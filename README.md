@@ -92,7 +92,7 @@ You can apply many commands to selections. With a selection, you can perform the
 
 ### Editing (Command mode)
 
-_NOTE: If you select line-wise pasting will also work line-wise_
+_NOTE: If you select line-wise, pasting will also work line-wise_
 
 - `dd` - Delete a line
 - `.` - Repeat the last action
