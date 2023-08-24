@@ -51,6 +51,7 @@ Additional to default Vim navigation these are some customizations
 Here's the same information in more detail, as mentioned, these are just the *key* commands that come to mind:
 
 ### Loading, Saving, Exiting
+
 - `:w` - Save the file
 - `:wq` - Save the file and exit Vim
 - `:q` - Exit
@@ -58,7 +59,8 @@ Here's the same information in more detail, as mentioned, these are just the *ke
 - `:w!` - Try to save even if read-only
 - `:e <File>` - Open `<File>` for editing
 
-### Insert Mode
+### Switching From Command to Insert Mode
+
 - `o` - Open a new line below the current line for editing
 - `O` - Open a new line above the current line for editing
 - `i` - Enter insert mode at the current position
@@ -67,11 +69,13 @@ Here's the same information in more detail, as mentioned, these are just the *ke
 - `cw` - Delete from the cursor position to the end of the word and switch to edit mode
 
 ### In Insert Mode
+
 - `C-n` - Auto-complete forward (press multiple times to cycle through suggestions)
 - `C-p` - Auto-complete backward (press multiple times to cycle through suggestions)
 - `ESC` - Exit insert mode and return to Command mode
 
 ### Selecting
+
 - `v` - Select character-wise
 - `V` - Select line-wise
 - `C-v` - Select block-wise
@@ -87,6 +91,9 @@ You can apply many commands to selections. With a selection, you can perform the
 - `gq` - Reformat the selection (useful for rewrapping text if you added something in between)
 
 ### Editing (Command mode)
+
+_NOTE: If you select line-wise pasting will also work line-wise_
+
 - `dd` - Delete a line
 - `.` - Repeat the last action
 - `u` - Undo
@@ -97,6 +104,7 @@ You can apply many commands to selections. With a selection, you can perform the
 - `==` - Automatically format the line
 
 ### Navigation
+
 - `0,$` - Go to the beginning, end of the line
 - `:0,:$` - Go to the beginning, end of the file
 - `:<Number>` - Go to line `<Number>`
@@ -115,10 +123,12 @@ You can apply many commands to selections. With a selection, you can perform the
 - `%` - Bracket matching: Jump from an opening bracket to its closing counterpart and vice versa
 
 ### Compiling
+
 - `:make` - Run `make` in the current directory
 - `:copen` - Open a new window with the compiler output. Press Enter on a warning/error to jump to that location automatically.
 
 ### Windows
+
 - `C-w <left>,<up>,<down>,<right>` - Jump to a window on the left, up, down, or right of the current one
 - `C-w` - Jump to the window above
 - `C-w n` - Create a new window above
@@ -126,9 +136,11 @@ You can apply many commands to selections. With a selection, you can perform the
 - `C-w c` - Close the current window
 
 ### Buffers
+
 - `:bnext` - Switch to the next buffer (mapped to `<Tab>` in my .vimrc)
 - `:bprevious` - Switch to the previous buffer (mapped to `<Shift>`+`<Tab>` in my .vimrc)
 - `:bdelete` - Close the buffer
+
 ## Tips
 
 ### Debugging Language Server Configuration
