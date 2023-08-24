@@ -534,6 +534,9 @@ mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
 }
 
+-- work around for 'warning: multiple different client offset_encodings detected for buffer, this is not supported yet'
+capabilities.offsetEncoding = 'utf-8'
+
 mason_lspconfig.setup_handlers {
   function(server_name)
     require('lspconfig')[server_name].setup {
