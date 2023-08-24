@@ -36,101 +36,99 @@ Additional to default Vim navigation these are some customizations
 ## My personal list of the most important Vim commands
 
 ### 10 most important Commands:
-- `i` - Insertmodus (Editiermodus) starten (jetzt kannst du Text eingeben)
-- `ESC` - Insertmodus beenden und zurück zum Kommandomodus
-- `:q!` - Beenden ohne zu speichern
-- `:wq` - Speichern und beenden
+
+- `i` - Enter Insert mode (editing mode) (now you can enter text)
+- `ESC` - Exit Insert mode and return to Command mode
+- `:q!` - Quit without saving
+- `:wq` - Save and quit
 - `u` - Undo
 - `C-r` - Redo
-- `v` - Selektiert Zeichenweise
-- `y` - Den selektierten Text kopieren (yank)
-- `d` - Den selektierten Text ausschneiden (wird ins Copy Register gespeichert)
-- `P` - Den kopierten Text im aktuellen Copy Register vor der aktuellen Position einfügen
+- `v` - Select character-wise
+- `y` - Copy the selected text (yank)
+- `d` - Cut the selected text (saves to the copy register)
+- `P` - Paste the copied text from the current copy register before the current position
 
-Das ganze nochmal in ausführlich, sind wie gesagt nur die *wichtigsten* Kommandos die mir aus dem Kopf gerade einfallen :-)
+Here's the same information in more detail, as mentioned, these are just the *key* commands that come to mind:
 
-### Laden, Speichern, Beenden
-- `:w` - Speichert die Datei
-- `:wq` - Speichert die Datei und beendet Vim
-- `:q` - Beendet
-- `:q!` - Beendet auch wenn noch nicht alles gespeichert ist
-- `:w!` - versucht zu speichern auch wenn schreibgeschützt
-- `:e <Datei>` - Öffnet `<Datei>` zum Editieren
+### Loading, Saving, Exiting
+- `:w` - Save the file
+- `:wq` - Save the file and exit Vim
+- `:q` - Exit
+- `:q!` - Exit even if not everything is saved
+- `:w!` - Try to save even if read-only
+- `:e <File>` - Open `<File>` for editing
 
-### Editiermodus
-- `o` - Springt unter die aktuelle Zeile zum editieren
-- `O` - Springt über die aktuelle Zeile zum editieren
-- `i` - Editiermodus an der aktuellen Position
-- `a` - Editiermodus hinter dem aktuellen Zeichen
-- `A` - Editiermodus am Ende der Zeile
-- `cw` - Löscht von Cursorposition zum Ende des Wortes und wechselt in den Editiermodus
+### Insert Mode
+- `o` - Open a new line below the current line for editing
+- `O` - Open a new line above the current line for editing
+- `i` - Enter insert mode at the current position
+- `a` - Enter insert mode after the current character
+- `A` - Enter insert mode at the end of the line
+- `cw` - Delete from the cursor position to the end of the word and switch to edit mode
 
-### Im Insertmodus (Editiermodus)
-- `C-n` - Autovervollständigung vorwärts (öfters drücken um zum nächsten Begriff zu springen)
-- `C-p` - Autovervollständigung rückwärts (öfters drücken um zum nächsten Begriff zu springen)
-- `ESC` - Insertmodus beenden und zurück zum Kommandomodus
+### In Insert Mode
+- `C-n` - Auto-complete forward (press multiple times to cycle through suggestions)
+- `C-p` - Auto-complete backward (press multiple times to cycle through suggestions)
+- `ESC` - Exit insert mode and return to Command mode
 
-### Selektieren
-- `v` - Selektiert Zeichenweise
-- `V` - Selektiert Zeilenweise
-- `C-v` - Selektiert Blockweise
+### Selecting
+- `v` - Select character-wise
+- `V` - Select line-wise
+- `C-v` - Select block-wise
 
-Auf Selektionen kann man viele Kommandos anwenden
-Mit Selektion folgende Kommandos ausgeführt kannst du:
+You can apply many commands to selections. With a selection, you can perform the following commands:
 
-- `d` - Den selektierten Text ausschneiden (wird ins Copy Register gespeichert)
-- `y` - Den selektierten Text kopieren (yank)
-- `:` - Ein Kommando auf die Selektion anwenden (z.b. :s/bla/blub/ um alle Vorkommen von bla durch blub zu ersetzen)
-- `:w` - Die Selektion in einer Datei speichern
-- `:sort` - Die Zeilen in der Selektion alphabetisch sortieren
-- `=` - Selektion automatisch Formatieren (Einrückungen)
-- `gq` - Selektion neu umbrechen (Textenbeschreibungen ganz nützlich wenn du zwischendrin was eingefügt hast)
+- `d` - Cut the selected text (saves to the copy register)
+- `y` - Copy the selected text (yank)
+- `:` - Apply a command to the selection (e.g., `:s/bla/blub/` to replace all occurrences of "bla" with "blub")
+- `:w` - Save the selection to a file
+- `:sort` - Alphabetically sort the lines in the selection
+- `=` - Automatically format (indent) the selection
+- `gq` - Reformat the selection (useful for rewrapping text if you added something in between)
 
-### Editieren (Kommandomodus)
-_Achtung: wenn Zeilenweise kopiert/gelöscht dann wird auch zeilenweise eingefügt)_
-- `dd` - Eine Zeile löschen
-- `.` - Letzte Aktion wiederholen
+### Editing (Command mode)
+- `dd` - Delete a line
+- `.` - Repeat the last action
 - `u` - Undo
 - `C-r` - Redo
-- `D` - Zeichen von aktueller Position bis Ende der Zeile löschen
-- `p` - Den Text im aktuellen Copy Register nach der aktuellen Position einfügen
-- `P` - Den Text im aktuellen Copy Register vor der aktuellen Position einfügen
-- `==` - Zeile automatisch formatieren
+- `D` - Delete from the current position to the end of the line
+- `p` - Paste the text from the current copy register after the current position
+- `P` - Paste the text from the current copy register before the current position
+- `==` - Automatically format the line
 
-### Bewegen
-- `0,$` - Springe zum Anfang, Ende der Zeile
-- `:0,:$` - Springe zum Anfang, Ende der Datei
-- `:<Nummer>` - Springt zur Zeile <Nummer>
-- `h,j,k,l` - Cursor nach links, runter, hoch, rechts bewegen
-- `C-u` - Seite nach oben
-- `C-d` - Seite nach unten
-- Suchen: _Suchbegriffe können mit den Cursortasten aus der History geholt werden_
-  - `/<Begriff>` - Nach unten nach Begriff suchen
-  - `?<Begriff>` - Nach oben nach Begriff suchen
-- `n` - Mit der letzten Suche weiter springen
-- `N` - Mit der letzten Suche zurück springen
-- `*` - Wort unter dem Cursor vorwärts suchen und hinspringen
-- `#` - Wort unter dem Cursor rückwärts suchen und hinspringen
-- `E` - Bis zum nächsten Space weiterspringen
-- `B` - Bis zum nächsten Space zurückspringen
-- `%` - Bracketmatching: Spring von öffnender Klammer zur schließenden bzw. zurück.
+### Navigation
+- `0,$` - Go to the beginning, end of the line
+- `:0,:$` - Go to the beginning, end of the file
+- `:<Number>` - Go to line `<Number>`
+- `h,j,k,l` - Move the cursor left, down, up, right
+- `C-u` - Scroll up by one page
+- `C-d` - Scroll down by one page
+- Searching: _Search terms can be retrieved from the history using the cursor keys_
+  - `/<Term>` - Search down for `<Term>`
+  - `?<Term>` - Search up for `<Term>`
+- `n` - Jump to the next occurrence of the last search
+- `N` - Jump to the previous occurrence of the last search
+- `*` - Search forward for the word under the cursor and jump to it
+- `#` - Search backward for the word under the cursor and jump to it
+- `E` - Jump to the next space
+- `B` - Jump to the previous space
+- `%` - Bracket matching: Jump from an opening bracket to its closing counterpart and vice versa
 
-### Compilieren
-- `:make` - make im aktuellen Verzeichnis ausführen
-- `:copen` - öffnet ein neues Window mit der Compilerausgabe. Bei Enter auf einer Warnung/Error springst du automatisch zur Stelle
+### Compiling
+- `:make` - Run `make` in the current directory
+- `:copen` - Open a new window with the compiler output. Press Enter on a warning/error to jump to that location automatically.
 
 ### Windows
-- `C-w <left>,<up>,<down>,<right>` - Ein Window nach links,unten,oben,rechts vom aktuellen springen
-- `C-w` - Ein Window nach oben springen
-- `C-w n` - Ein neues Window oben anlegen
-- `C-w v` - Ein neues Window daneben anlegen
-- `C-w c` - Aktuelles Window schliessen
+- `C-w <left>,<up>,<down>,<right>` - Jump to a window on the left, up, down, or right of the current one
+- `C-w` - Jump to the window above
+- `C-w n` - Create a new window above
+- `C-w v` - Create a new window beside
+- `C-w c` - Close the current window
 
-### Buffer
-- `:bnext` - Nächsten Buffer (mit meiner .vimrc auf <Tab> gemappt)
-- `:bprevious` - Vorherigen Buffer (mit meiner .vimrc auf <Shift>-<Tab> gemappt)
-- `:bdelete` - Buffer schliessen
-
+### Buffers
+- `:bnext` - Switch to the next buffer (mapped to `<Tab>` in my .vimrc)
+- `:bprevious` - Switch to the previous buffer (mapped to `<Shift>`+`<Tab>` in my .vimrc)
+- `:bdelete` - Close the buffer
 ## Tips
 
 ### Debugging Language Server Configuration
