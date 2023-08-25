@@ -206,6 +206,7 @@ require('lazy').setup({
   'nvim-tree/nvim-web-devicons',
   'nvim-tree/nvim-tree.lua',
   'stevearc/dressing.nvim',
+  'ntpeters/vim-better-whitespace',
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -676,7 +677,8 @@ noremap <C-h> <C-w>h
 
 nnoremap <Leader>o :.GBrowse<CR>
 
-match Todo /\s\+$/
+let g:better_whitespace_enabled=1
+EnableWhitespace
 
 noremap <Space> <PageDown>
 noremap <BS> <PageUp>
