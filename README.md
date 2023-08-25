@@ -6,13 +6,14 @@ personal [.vimrc](https://www.hvoigt.net/.vimrc) preferences.
 
 ## Installation
 
-Install NeoVim and clone this repository as the configuration directory for
-NeoVim:
+Install NeoVim, Install a [Nerd Font][nf] of your liking and clone this
+repository as the configuration directory for NeoVim:
 
 ```sh
-brew install neovim
 git clone https://github.com/hvoigt/config-nvim.git ~/.config/nvim
 ```
+
+[nf]: https://www.nerdfonts.com/
 
 ## Usage
 
