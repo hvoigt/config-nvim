@@ -4,9 +4,19 @@ This is my NeoVim configuration. It is currently cobbled together from
 [kickstart.vim](https://github.com/nvim-lua/kickstart.nvim), and my good old
 personal [.vimrc](https://www.hvoigt.net/.vimrc) preferences.
 
-Use `:Mason` to install all language server support needed.
+## Installation
+
+Install NeoVim and clone this repository as the configuration directory for
+NeoVim:
+
+```sh
+brew install neovim
+git clone https://github.com/hvoigt/config-nvim.git ~/.config/nvim
+```
 
 ## Usage
+
+Use `:Mason` to install all language server support needed.
 
 This is a highly opinionated list of the additional features:
 
