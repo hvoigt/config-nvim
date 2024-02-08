@@ -495,7 +495,6 @@ end
 --  define the property 'filetypes' to the map in question.
 local servers = {
   -- clangd = {},
-  -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
@@ -553,7 +552,13 @@ local servers = {
 			},
 		},
 	},
-	gopls = {},
+	gopls = {
+    analyses = {
+      unusedparams = true,
+    },
+    staticcheck = true,
+    gofumpt = true,
+  },
 
   lua_ls = {
     Lua = {
@@ -562,6 +567,14 @@ local servers = {
 			diagnostics = {
 				globals = { "vim" },
 			},
+    },
+  },
+  terraformls = {
+    filetypes = { 'terraform', 'tf' },
+    settings = {
+      format = {
+        enable = true,
+      },
     },
   },
 }
@@ -593,6 +606,13 @@ mason_lspconfig.setup_handlers {
     }
   end
 }
+
+vim.api.nvim_create_autocmd({"BufWritePre"}, {
+  pattern = { "*.tf", "*.tfvars", "*.go"},
+  callback = function()
+    vim.lsp.buf.format()
+  end
+})
 
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
