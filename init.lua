@@ -207,6 +207,21 @@ require('lazy').setup({
   'nvim-tree/nvim-tree.lua',
   'stevearc/dressing.nvim',
   'ntpeters/vim-better-whitespace',
+  {
+    "epwalsh/obsidian.nvim",
+    lazy = true,
+    event = { "BufReadPre " .. vim.fn.expand "~" .. "/Documents/obsidian/**.md" },
+    -- If you want to use the home shortcut '~' here you need to call 'vim.fn.expand':
+    -- event = { "BufReadPre " .. vim.fn.expand "~" .. "/my-vault/**.md" },
+    dependencies = {
+      -- Required.
+      "nvim-lua/plenary.nvim",
+
+    },
+    opts = {
+      dir = "~/Documents/obsidian",  -- no need to call 'vim.fn.expand' here
+    },
+  }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
