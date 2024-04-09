@@ -743,5 +743,7 @@ endif
 
 require("nvim-tree").setup()
 
+vim.opt_local.conceallevel = 2
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
