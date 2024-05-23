@@ -221,6 +221,10 @@ require('lazy').setup({
     opts = {
       dir = "~/Documents/obsidian",  -- no need to call 'vim.fn.expand' here
     },
+    'mfussenegger/nvim-dap',
+    'leoluz/nvim-dap-go',
+    'nvim-neotest/nvim-nio',
+    'rcarriga/nvim-dap-ui',
   }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -595,7 +599,9 @@ local servers = {
 }
 
 -- Setup neovim lua configuration
-require('neodev').setup()
+require('neodev').setup({
+  library = { plugins = { "nvim-dap-ui" }, types = true },
+})
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -676,6 +682,9 @@ cmp.setup {
     { name = 'luasnip' },
   },
 }
+
+require('dap-go').setup()
+require("dapui").setup()
 
 vim.cmd([[
 set tabstop=4
