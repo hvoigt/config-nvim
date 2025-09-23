@@ -349,6 +349,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
   defaults = {
+    vimgrep_arguments = { 'rg', '--hidden', '--color=never', '--no-heading', '--with-filename', '--line-number', '--column', '--smart-case', '-g', '!.git' },
     mappings = {
       i = {
         ['<C-u>'] = false,
@@ -450,6 +451,11 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous dia
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+
+-- Copilot
+vim.keymap.set('i','<C-/>', 'copilot#Accept("\\<CR>")', {
+  expr = true, replace_keycodes = false
+})
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
@@ -779,6 +785,7 @@ noremap T <C-T>
 
 let g:terraform_fmt_on_save=1
 let g:terraform_align=1
+let g:markdown_folding=1
 
 set cursorline
 set cursorcolumn
