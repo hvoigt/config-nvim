@@ -647,11 +647,14 @@ local servers = {
 		},
 	},
 	gopls = {
-    analyses = {
-      unusedparams = true,
+    gopls = {
+      analyses = {
+        unusedparams = true,
+      },
+      staticcheck = true,
+      gofumpt = true,
+      buildFlags = { "-tags=integration" }
     },
-    staticcheck = true,
-    gofumpt = true,
   },
 
   lua_ls = {
