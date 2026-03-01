@@ -225,6 +225,44 @@ require('lazy').setup({
     'leoluz/nvim-dap-go',
     'nvim-neotest/nvim-nio',
     'rcarriga/nvim-dap-ui',
+  },
+  'opdavies/toggle-checkbox.nvim',
+  {
+    "folke/trouble.nvim",
+    opts = {}, -- for default options, refer to the configuration section for custom setup.
+    cmd = "Trouble",
+    keys = {
+      {
+        "<leader>xx",
+        "<cmd>Trouble diagnostics toggle<cr>",
+        desc = "Diagnostics (Trouble)",
+      },
+      {
+        "<leader>xX",
+        "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+        desc = "Buffer Diagnostics (Trouble)",
+      },
+      {
+        "<leader>cs",
+        "<cmd>Trouble symbols toggle focus=false<cr>",
+        desc = "Symbols (Trouble)",
+      },
+      {
+        "<leader>cl",
+        "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+        desc = "LSP Definitions / references / ... (Trouble)",
+      },
+      {
+        "<leader>xL",
+        "<cmd>Trouble loclist toggle<cr>",
+        desc = "Location List (Trouble)",
+      },
+      {
+        "<leader>xQ",
+        "<cmd>Trouble qflist toggle<cr>",
+        desc = "Quickfix List (Trouble)",
+      },
+    },
   }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -241,6 +279,8 @@ require('lazy').setup({
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
 }, {})
+
+vim.keymap.set("n", "<leader>tt", ":lua require('toggle-checkbox').toggle()<CR>")
 
 require('lualine').setup {
   options = {
@@ -803,6 +843,55 @@ endif
 require("nvim-tree").setup()
 
 vim.opt_local.conceallevel = 2
+
+-- Handling of .gpg files
+local gpgGroup = vim.api.nvim_create_augroup('customGpg', { clear = true })
+
+-- autocmds execute in the order in which they were defined.
+-- https://neovim.io/doc/user/autocmd.html#autocmd-define
+
+vim.api.nvim_create_autocmd({ 'BufReadPre', 'FileReadPre' }, {
+    pattern = '*.gpg',
+    group = gpgGroup,
+    callback = function ()
+        -- Make sure nothing is written to shada file while editing an encrypted file.
+        vim.opt_local.shada = nil
+        -- We don't want a swap file, as it writes unencrypted data to disk
+        vim.opt_local.swapfile = false
+        -- Switch to binary mode to read the encrypted file
+        vim.opt_local.bin = true
+
+        vim.cmd("let ch_save = &ch|set ch=2")
+    end
+})
+
+vim.api.nvim_create_autocmd({ 'BufReadPost', 'FileReadPost' }, {
+    pattern = '*.gpg',
+    group = gpgGroup,
+    callback = function ()
+        vim.cmd("'[,']!gpg --decrypt 2> /dev/null")
+
+        -- Switch to normal mode for editing
+        vim.opt_local.bin = false
+
+        vim.cmd('let &ch = ch_save|unlet ch_save')
+        vim.cmd(":doautocmd BufReadPost " .. vim.fn.expand("%:r"))
+    end
+})
+
+-- Convert all text to encrypted text before writing
+vim.api.nvim_create_autocmd({ 'BufWritePre', 'FileWritePre' }, {
+    pattern = '*.gpg',
+    group = gpgGroup,
+    command = "'[,']!gpg --default-recipient-self -ae 2>/dev/null",
+})
+-- Undo the encryption so we are back in the normal text, directly
+-- after the file has been written.
+vim.api.nvim_create_autocmd({ 'BufWritePost', 'FileWritePost' }, {
+    pattern = '*.gpg',
+    group = gpgGroup,
+    command = 'u'
+})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
