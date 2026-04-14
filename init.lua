@@ -195,6 +195,14 @@ require('lazy').setup({
   {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    opts = {
+    	indent = {
+    		enable = true,
+    		disable = {
+    			"markdown",-- indentation at bullet points is worse
+    		},
+    	},
+    },
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
     },
@@ -209,11 +217,11 @@ require('lazy').setup({
   'nvim-tree/nvim-web-devicons',
   'nvim-tree/nvim-tree.lua',
   'stevearc/dressing.nvim',
-  'ntpeters/vim-better-whitespace',
+  --'ntpeters/vim-better-whitespace',
   {
     "epwalsh/obsidian.nvim",
     lazy = true,
-    event = { "BufReadPre " .. vim.fn.expand "~" .. "/Documents/obsidian/**.md" },
+    event = { "BufReadPre " .. vim.fn.expand "~" .. "/notizen-jimdo/**.md" },
     -- If you want to use the home shortcut '~' here you need to call 'vim.fn.expand':
     -- event = { "BufReadPre " .. vim.fn.expand "~" .. "/my-vault/**.md" },
     dependencies = {
@@ -222,7 +230,7 @@ require('lazy').setup({
 
     },
     opts = {
-      dir = "~/Documents/obsidian",  -- no need to call 'vim.fn.expand' here
+      dir = "~/notizen-jimdo",  -- no need to call 'vim.fn.expand' here
     },
     'mfussenegger/nvim-dap',
     'leoluz/nvim-dap-go',
@@ -294,7 +302,8 @@ require('lazy').setup({
         ft = { "markdown", "Avante" },
       },
     },
-  }
+  },
+  'sbdchd/neoformat',
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -309,6 +318,7 @@ require('lazy').setup({
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
+  'google/vim-jsonnet'
 }, {})
 
 require('lualine').setup {
@@ -640,8 +650,10 @@ local servers = {
 	html = {},
 	jsonls = {},
 	ltex = {
+    autostart = false,
 		ltex = {
 			dictionary = {
+        checkFrequency = "save",
 				["en-US"] = words,
 			},
 		},
@@ -652,7 +664,7 @@ local servers = {
         unusedparams = true,
       },
       staticcheck = true,
-      gofumpt = true,
+      --gofumpt = true,
       buildFlags = { "-tags=integration" }
     },
   },
@@ -839,8 +851,8 @@ noremap <C-h> <C-w>h
 
 nnoremap <Leader>o :.GBrowse<CR>
 
-let g:better_whitespace_enabled=1
-EnableWhitespace
+"let g:better_whitespace_enabled=1
+"EnableWhitespace
 
 noremap <Space> <PageDown>
 noremap <BS> <PageUp>
