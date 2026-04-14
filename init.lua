@@ -476,7 +476,7 @@ require('nvim-treesitter.configs').setup {
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
 
-  highlight = { enable = true },
+  highlight = { enable = true, disable = { 'markdown', 'markdown_inline' } },
   indent = { enable = true },
   incremental_selection = {
     enable = true,
@@ -532,6 +532,14 @@ require('nvim-treesitter.configs').setup {
     },
   },
 }
+
+-- Workaround: nvim-treesitter query_predicates bug with Neovim 0.12 causes nil node errors on markdown
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'markdown',
+  callback = function(args)
+    vim.treesitter.stop(args.buf)
+  end,
+})
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
@@ -703,22 +711,21 @@ capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
 
-mason_lspconfig.setup {
-  ensure_installed = vim.tbl_keys(servers),
-}
-
 -- work around for 'warning: multiple different client offset_encodings detected for buffer, this is not supported yet'
 capabilities.offsetEncoding = 'utf-8'
 
-mason_lspconfig.setup_handlers {
-  function(server_name)
-    require('lspconfig')[server_name].setup {
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    }
-  end
+mason_lspconfig.setup {
+  ensure_installed = vim.tbl_keys(servers),
+  handlers = {
+    function(server_name)
+      require('lspconfig')[server_name].setup {
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = servers[server_name],
+        filetypes = (servers[server_name] or {}).filetypes,
+      }
+    end,
+  },
 }
 
 vim.api.nvim_create_autocmd({"BufWritePre"}, {
