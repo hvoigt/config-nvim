@@ -43,6 +43,11 @@ P.S. You can delete this when you're done too. It's your config now :)
 vim.g.mapleader = ','
 vim.g.maplocalleader = ','
 
+-- terraform-ls is extremely chatty on stderr; nvim logs every line at ERROR
+-- level, which filled an 18MB lsp.log in a few hours and added sync-write
+-- overhead. Keep only real warnings/errors from the LSP framework itself.
+vim.lsp.log.set_level(vim.log.levels.WARN)
+
 vim.g.copilot_proxy_strict_ssl = false
 vim.env.NODE_EXTRA_CA_CERTS = vim.fn.expand("~/.config/nvim/Cloudflare_CA.pem")
 
@@ -76,6 +81,8 @@ require('lazy').setup({
 
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
+  -- NOTE: syntastic removed — it runs synchronously and duplicates LSP
+  -- diagnostics; it was contributing to main-thread CPU spikes on terraform.
 
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
@@ -218,7 +225,6 @@ require('lazy').setup({
   },
 
   'hashivim/vim-terraform',
-  'vim-syntastic/syntastic',
   'juliosueiras/vim-terraform-completion',
   'github/copilot.vim',
   'nvim-lualine/lualine.nvim',
@@ -488,7 +494,15 @@ vim.keymap.set('i','<C-/>', 'copilot#Accept("\\<CR>")', {
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(_, bufnr)
+local on_attach = function(client, bufnr)
+  -- terraform-ls returns huge full-buffer semanticTokens payloads (tens of KB)
+  -- and re-sends them on every change. nvim applies these on the main thread,
+  -- which pegged the UI loop at ~100% CPU on large .tf files. Treesitter still
+  -- handles terraform highlighting, so drop LSP semantic tokens for this server.
+  if client and client.name == 'terraformls' then
+    client.server_capabilities.semanticTokensProvider = nil
+  end
+
   -- NOTE: Remember that lua is a real programming language, and as such it is possible
   -- to define small helper and utility functions so you don't have to repeat yourself
   -- many times.
@@ -648,19 +662,32 @@ local mason_lspconfig = require 'mason-lspconfig'
 -- work around for 'warning: multiple different client offset_encodings detected for buffer, this is not supported yet'
 capabilities.offsetEncoding = 'utf-8'
 
+-- mason-lspconfig v2.x removed the `handlers` field from setup(), and the
+-- `require('lspconfig')[server].setup{}` framework is deprecated in nvim 0.11+.
+-- Use the native vim.lsp.config/vim.lsp.enable API so our on_attach (which binds
+-- gd, gr, K, etc.) actually runs and we stay compatible with nvim-lspconfig v3.
 mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
-  handlers = {
-    function(server_name)
-      require('lspconfig')[server_name].setup {
-        capabilities = capabilities,
-        on_attach = on_attach,
-        settings = servers[server_name],
-        filetypes = (servers[server_name] or {}).filetypes,
-      }
-    end,
-  },
+  automatic_enable = false,
 }
+
+-- Servers we only want to start manually (e.g. the ltex grammar checker).
+local manual_only = { ltex = true }
+local to_enable = {}
+
+for server_name, server_settings in pairs(servers) do
+  vim.lsp.config(server_name, {
+    capabilities = capabilities,
+    on_attach = on_attach,
+    settings = server_settings,
+    filetypes = (server_settings or {}).filetypes,
+  })
+  if not manual_only[server_name] then
+    table.insert(to_enable, server_name)
+  end
+end
+
+vim.lsp.enable(to_enable)
 
 vim.api.nvim_create_autocmd({"BufWritePre"}, {
   pattern = { "*.tf", "*.tfvars", "*.go"},
