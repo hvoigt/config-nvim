@@ -43,6 +43,14 @@ P.S. You can delete this when you're done too. It's your config now :)
 vim.g.mapleader = ','
 vim.g.maplocalleader = ','
 
+-- terraform-ls is extremely chatty on stderr; nvim logs every line at ERROR
+-- level, which filled an 18MB lsp.log in a few hours and added sync-write
+-- overhead. Keep only real warnings/errors from the LSP framework itself.
+vim.lsp.log.set_level(vim.log.levels.WARN)
+
+vim.g.copilot_proxy_strict_ssl = false
+vim.env.NODE_EXTRA_CA_CERTS = vim.fn.expand("~/.config/nvim/Cloudflare_CA.pem")
+
 -- Install package manager
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
@@ -73,6 +81,8 @@ require('lazy').setup({
 
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
+  -- NOTE: syntastic removed — it runs synchronously and duplicates LSP
+  -- diagnostics; it was contributing to main-thread CPU spikes on terraform.
 
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
@@ -86,10 +96,18 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', tag = 'legacy', opts = {} },
+      { 'j-hui/fidget.nvim', opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
-      'folke/neodev.nvim',
+      {
+        'folke/lazydev.nvim',
+        ft = 'lua',
+        opts = {
+          library = {
+            { path = 'nvim-dap-ui' },
+          },
+        },
+      },
     },
   },
 
@@ -192,6 +210,14 @@ require('lazy').setup({
   {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    opts = {
+    	indent = {
+    		enable = true,
+    		disable = {
+    			"markdown",-- indentation at bullet points is worse
+    		},
+    	},
+    },
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
     },
@@ -199,18 +225,17 @@ require('lazy').setup({
   },
 
   'hashivim/vim-terraform',
-  'vim-syntastic/syntastic',
   'juliosueiras/vim-terraform-completion',
   'github/copilot.vim',
   'nvim-lualine/lualine.nvim',
   'nvim-tree/nvim-web-devicons',
   'nvim-tree/nvim-tree.lua',
   'stevearc/dressing.nvim',
-  'ntpeters/vim-better-whitespace',
+  --'ntpeters/vim-better-whitespace',
   {
     "epwalsh/obsidian.nvim",
     lazy = true,
-    event = { "BufReadPre " .. vim.fn.expand "~" .. "/Documents/obsidian/**.md" },
+    event = { "BufReadPre " .. vim.fn.expand "~" .. "/notizen-jimdo/**.md" },
     -- If you want to use the home shortcut '~' here you need to call 'vim.fn.expand':
     -- event = { "BufReadPre " .. vim.fn.expand "~" .. "/my-vault/**.md" },
     dependencies = {
@@ -219,7 +244,7 @@ require('lazy').setup({
 
     },
     opts = {
-      dir = "~/Documents/obsidian",  -- no need to call 'vim.fn.expand' here
+      dir = "~/notizen-jimdo",  -- no need to call 'vim.fn.expand' here
     },
     'mfussenegger/nvim-dap',
     'leoluz/nvim-dap-go',
@@ -263,7 +288,8 @@ require('lazy').setup({
         desc = "Quickfix List (Trouble)",
       },
     },
-  }
+  },
+  'sbdchd/neoformat',
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -278,6 +304,7 @@ require('lazy').setup({
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
+  'google/vim-jsonnet'
 }, {})
 
 vim.keymap.set("n", "<leader>tt", ":lua require('toggle-checkbox').toggle()<CR>")
@@ -429,7 +456,7 @@ require('nvim-treesitter').setup {
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
 
-  highlight = { enable = true },
+  highlight = { enable = true, disable = { 'markdown', 'markdown_inline' } },
   indent = { enable = true },
   incremental_selection = {
     enable = true,
@@ -486,6 +513,14 @@ require('nvim-treesitter').setup {
   },
 }
 
+-- Workaround: nvim-treesitter query_predicates bug with Neovim 0.12 causes nil node errors on markdown
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'markdown',
+  callback = function(args)
+    vim.treesitter.stop(args.buf)
+  end,
+})
+
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
@@ -499,7 +534,15 @@ vim.keymap.set('i','<C-/>', 'copilot#Accept("\\<CR>")', {
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(_, bufnr)
+local on_attach = function(client, bufnr)
+  -- terraform-ls returns huge full-buffer semanticTokens payloads (tens of KB)
+  -- and re-sends them on every change. nvim applies these on the main thread,
+  -- which pegged the UI loop at ~100% CPU on large .tf files. Treesitter still
+  -- handles terraform highlighting, so drop LSP semantic tokens for this server.
+  if client and client.name == 'terraformls' then
+    client.server_capabilities.semanticTokensProvider = nil
+  end
+
   -- NOTE: Remember that lua is a real programming language, and as such it is possible
   -- to define small helper and utility functions so you don't have to repeat yourself
   -- many times.
@@ -611,8 +654,10 @@ local servers = {
 	html = {},
 	jsonls = {},
 	ltex = {
+    autostart = false,
 		ltex = {
 			dictionary = {
+        checkFrequency = "save",
 				["en-US"] = words,
 			},
 		},
@@ -623,7 +668,7 @@ local servers = {
         unusedparams = true,
       },
       staticcheck = true,
-      gofumpt = true,
+      --gofumpt = true,
       buildFlags = { "-tags=integration" }
     },
   },
@@ -647,11 +692,6 @@ local servers = {
   },
 }
 
--- Setup neovim lua configuration
-require('neodev').setup({
-  library = { plugins = { "nvim-dap-ui" }, types = true },
-})
-
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
@@ -659,21 +699,35 @@ capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
 
+-- work around for 'warning: multiple different client offset_encodings detected for buffer, this is not supported yet'
+capabilities.offsetEncoding = 'utf-8'
+
+-- mason-lspconfig v2.x removed the `handlers` field from setup(), and the
+-- `require('lspconfig')[server].setup{}` framework is deprecated in nvim 0.11+.
+-- Use the native vim.lsp.config/vim.lsp.enable API so our on_attach (which binds
+-- gd, gr, K, etc.) actually runs and we stay compatible with nvim-lspconfig v3.
 mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
-  handlers = {
-    function(server_name)
-      require('lspconfig')[server_name].setup {
-        capabilities = capabilities,
-        on_attach = on_attach,
-        settings = servers[server_name],
-        filetypes = (servers[server_name] or {}).filetypes,
-      }
-    end,
-  },
+  automatic_enable = false,
 }
 
-capabilities.offsetEncoding = 'utf-8'
+-- Servers we only want to start manually (e.g. the ltex grammar checker).
+local manual_only = { ltex = true }
+local to_enable = {}
+
+for server_name, server_settings in pairs(servers) do
+  vim.lsp.config(server_name, {
+    capabilities = capabilities,
+    on_attach = on_attach,
+    settings = server_settings,
+    filetypes = (server_settings or {}).filetypes,
+  })
+  if not manual_only[server_name] then
+    table.insert(to_enable, server_name)
+  end
+end
+
+vim.lsp.enable(to_enable)
 
 vim.api.nvim_create_autocmd({"BufWritePre"}, {
   pattern = { "*.tf", "*.tfvars", "*.go"},
@@ -808,8 +862,8 @@ noremap <C-h> <C-w>h
 
 nnoremap <Leader>o :.GBrowse<CR>
 
-let g:better_whitespace_enabled=1
-EnableWhitespace
+"let g:better_whitespace_enabled=1
+"EnableWhitespace
 
 noremap <Space> <PageDown>
 noremap <BS> <PageUp>
